@@ -1,0 +1,9 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="#333" />
+  <rect x="100" y="150" width="200" height="300" fill="#555" />
+  <rect x="350" y="150" width="200" height="300" fill="#555" />
+  <rect x="600" y="150" width="100" height="300" fill="#555" />
+  <line x1="100" y1="250" x2="700" y2="250" stroke="#999" stroke-width="2" />
+  <line x1="100" y1="350" x2="700" y2="350" stroke="#999" stroke-width="2" />
+  <text x="400" y="500" font-family="Arial" font-size="24" fill="white" text-anchor="middle">Exhibitions and Forums</text>
+</svg>

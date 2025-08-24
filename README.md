@@ -1,24 +1,115 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# The Next Man Summit - Event Registration Website
+
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app) for event registration for The Next Man Summit, featuring a welcome page, registration form, and email confirmation functionality.
+
+## Technologies Used
+
+- [Next.js 15](https://nextjs.org/) - React framework
+- [React 19](https://react.dev/) - UI library
+- [Tailwind CSS 4](https://tailwindcss.com/) - Utility-first CSS framework
+- [Framer Motion](https://www.framer.com/motion/) - Animation library
+- [Supabase](https://supabase.com/) - Backend as a Service for database
+- [Resend](https://resend.com/) - Email API
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18.17 or later
+- npm or yarn
+- Supabase account
+- Resend account
+
+### Installation
+
+1. Clone the repository and install dependencies
+
+```bash
+git clone <repository-url>
+cd the-next-man-summit
+npm install
+```
+
+2. Set up environment variables
+
+```bash
+cp .env.local.example .env.local
+```
+
+Then edit `.env.local` with your actual Supabase and Resend API credentials.
+
+3. Run the development server:
 
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Project Setup
+
+### Supabase Setup
+
+1. Create a new project in Supabase
+2. Create a `registrations` table with the following schema:
+
+```sql
+create table registrations (
+  id uuid default uuid_generate_v4() primary key,
+  first_name text not null,
+  last_name text not null,
+  email text not null,
+  company text,
+  job_title text,
+  ticket_type text not null,
+  dietary_restrictions text,
+  special_requirements text,
+  created_at timestamp with time zone default now() not null
+);
+
+-- Enable Row Level Security
+alter table registrations enable row level security;
+
+-- Create a policy that allows inserts from authenticated and anonymous users
+create policy "Allow anonymous registrations" on registrations
+  for insert
+  to anon, authenticated
+  with check (true);
+
+-- Create a policy that only allows users to view their own registrations
+create policy "Users can view their own registrations" on registrations
+  for select
+  to authenticated
+  using (auth.uid() = id);
+```
+
+3. Get your Supabase URL and anon key from the project settings and add them to your `.env.local` file.
+
+### Resend Setup
+
+1. Create an account on [Resend](https://resend.com/)
+2. Create an API key and add it to your `.env.local` file
+3. Verify your domain if you want to use a custom sender domain
+
+## Project Structure
+
+- `app/page.tsx` - Home page with event information
+- `app/register/page.tsx` - Registration form
+- `app/confirmation/page.tsx` - Confirmation page after successful registration
+- `app/api/send-confirmation/route.ts` - API route for sending confirmation emails
+
+## Features
+
+- Responsive design with dark mode support
+- Animated UI components with Framer Motion
+- Form validation
+- Database storage with Supabase
+- Email confirmation with Resend
+- Error handling
 
 ## Learn More
 

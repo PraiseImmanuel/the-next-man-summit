@@ -1,0 +1,60 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="#f5f5f5" />
+  
+  <!-- Map background with grid -->
+  <g stroke="#ddd" stroke-width="1">
+    <line x1="0" y1="100" x2="800" y2="100" />
+    <line x1="0" y1="200" x2="800" y2="200" />
+    <line x1="0" y1="300" x2="800" y2="300" />
+    <line x1="0" y1="400" x2="800" y2="400" />
+    <line x1="0" y1="500" x2="800" y2="500" />
+    
+    <line x1="100" y1="0" x2="100" y2="600" />
+    <line x1="200" y1="0" x2="200" y2="600" />
+    <line x1="300" y1="0" x2="300" y2="600" />
+    <line x1="400" y1="0" x2="400" y2="600" />
+    <line x1="500" y1="0" x2="500" y2="600" />
+    <line x1="600" y1="0" x2="600" y2="600" />
+    <line x1="700" y1="0" x2="700" y2="600" />
+  </g>
+  
+  <!-- Roads -->
+  <g stroke="#ccc" stroke-width="10">
+    <line x1="0" y1="150" x2="800" y2="150" />
+    <line x1="0" y1="350" x2="800" y2="350" />
+    <line x1="150" y1="0" x2="150" y2="600" />
+    <line x1="450" y1="0" x2="450" y2="600" />
+    <line x1="650" y1="0" x2="650" y2="600" />
+  </g>
+  
+  <!-- Water -->
+  <path d="M0,50 C100,80 200,20 300,50 C400,80 500,20 600,50 C700,80 800,20 800,0 L0,0 Z" fill="#e6f7ff" />
+  
+  <!-- Parks -->
+  <circle cx="250" cy="250" r="50" fill="#e6ffe6" />
+  <circle cx="550" cy="450" r="70" fill="#e6ffe6" />
+  
+  <!-- Buildings -->
+  <rect x="180" y="120" width="30" height="20" fill="#ddd" />
+  <rect x="220" y="120" width="20" height="20" fill="#ddd" />
+  <rect x="420" y="120" width="20" height="30" fill="#ddd" />
+  <rect x="480" y="130" width="30" height="15" fill="#ddd" />
+  
+  <rect x="180" y="320" width="25" height="20" fill="#ddd" />
+  <rect x="220" y="320" width="15" height="20" fill="#ddd" />
+  <rect x="420" y="320" width="20" height="25" fill="#ddd" />
+  <rect x="480" y="330" width="25" height="15" fill="#ddd" />
+  
+  <!-- Location marker -->
+  <g transform="translate(400,300)">
+    <circle cx="0" cy="0" r="15" fill="#ff3333" />
+    <circle cx="0" cy="0" r="5" fill="white" />
+    <circle cx="0" cy="0" r="2" fill="#ff3333" />
+  </g>
+  
+  <!-- Pulse effect -->
+  <circle cx="400" cy="300" r="25" fill="none" stroke="#ff3333" stroke-width="2" opacity="0.6">
+    <animate attributeName="r" from="15" to="40" dur="1.5s" begin="0s" repeatCount="indefinite" />
+    <animate attributeName="opacity" from="0.6" to="0" dur="1.5s" begin="0s" repeatCount="indefinite" />
+  </circle>
+</svg>
