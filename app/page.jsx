@@ -6,6 +6,7 @@ import Footer from "@/components/footer";
 import HeroSection from "@/components/herosection";
 import SpeakerCarousel from "@/components/speakers";
 import { useState } from "react";
+import { submitRegistration, sendWelcomeEmail } from "@/lib/supabase";
 
 // Speakers data - updated from event types
 const speakers = [
@@ -85,9 +86,100 @@ const speakers = [
 
 export default function Home() {
   const [showContactForm, setShowContactForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    phone: "",
+    email: "",
+    consent: false,
+  });
 
   const handleContactFormToggle = () => {
     setShowContactForm(!showContactForm);
+    setSubmitStatus(null);
+    setFormData({ name: "", phone: "", email: "", consent: false });
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Basic validation
+    if (!formData.name.trim() || !formData.phone.trim()) {
+      setSubmitStatus({
+        type: "error",
+        message: "Name and phone are required fields.",
+      });
+      return;
+    }
+
+    if (!formData.consent) {
+      setSubmitStatus({
+        type: "error",
+        message: "Please consent to data processing to continue.",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+
+    try {
+      // Submit to Supabase
+      const registrationResult = await submitRegistration(formData);
+
+      if (!registrationResult.success) {
+        throw new Error(registrationResult.error);
+      }
+
+      // Send welcome email if email is provided and registration was successful
+      if (formData.email.trim() && registrationResult.data?.[0]) {
+        const emailResult = await sendWelcomeEmail({
+          email: formData.email,
+          name: formData.name,
+          id: registrationResult.data[0].id,
+        });
+
+        if (!emailResult.success) {
+          console.warn("Email sending failed:", emailResult.error);
+          // Don't throw error here - registration was successful even if email failed
+        }
+      }
+
+      setSubmitStatus({
+        type: "success",
+        message:
+          "Registration successful! We'll contact you shortly." +
+          (formData.email.trim()
+            ? " Check your email for confirmation details."
+            : ""),
+      });
+
+      // Reset form
+      setFormData({ name: "", phone: "", email: "", consent: false });
+
+      // Auto-close form after 3 seconds
+      setTimeout(() => {
+        handleContactFormToggle();
+      }, 3000);
+    } catch (error) {
+      console.error("Submission error:", error);
+      setSubmitStatus({
+        type: "error",
+        message:
+          "Registration failed. Please try again or contact us directly.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -115,7 +207,7 @@ export default function Home() {
               </a>
             </div>
             <button
-              // onClick={handleContactFormToggle}
+              onClick={handleContactFormToggle}
               className="bg-[#DDAA31] text-white px-4 py-2 text-sm font-bold hover:bg-[#C68C2C] transition-colors"
             >
               Register
@@ -133,47 +225,86 @@ export default function Home() {
               <button
                 onClick={handleContactFormToggle}
                 className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl"
+                disabled={isSubmitting}
               >
                 ✕
               </button>
-              <h2 className="text-xl font-bold mb-6">FEEDBACK FORM</h2>
+              <h2 className="text-xl font-bold mb-6">REGISTRATION FORM</h2>
               <p className="text-sm mb-6">
                 Fill out the form, and we will contact you shortly
               </p>
-              <form className="space-y-4">
+
+              {/* Status Message */}
+              {submitStatus && (
+                <div
+                  className={`mb-4 p-3 rounded ${
+                    submitStatus.type === "success"
+                      ? "bg-green-100 text-green-700 border border-green-300"
+                      : "bg-red-100 text-red-700 border border-red-300"
+                  }`}
+                >
+                  {submitStatus.message}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <input
                     type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
                     placeholder="Name*"
                     className="w-full p-2 border border-gray-300 focus:border-[#DDAA31] focus:outline-none"
+                    required
+                    disabled={isSubmitting}
                   />
                 </div>
                 <div>
                   <input
                     type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
                     placeholder="Phone*"
                     className="w-full p-2 border border-gray-300 focus:border-[#DDAA31] focus:outline-none"
+                    required
+                    disabled={isSubmitting}
                   />
                 </div>
                 <div>
                   <input
                     type="email"
-                    placeholder="Email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="Email (optional but recommended)"
                     className="w-full p-2 border border-gray-300 focus:border-[#DDAA31] focus:outline-none"
+                    disabled={isSubmitting}
                   />
                 </div>
                 <div className="flex items-start">
-                  <input type="checkbox" className="mt-1 mr-2" id="privacy" />
+                  <input
+                    type="checkbox"
+                    name="consent"
+                    checked={formData.consent}
+                    onChange={handleInputChange}
+                    className="mt-1 mr-2"
+                    id="privacy"
+                    required
+                    disabled={isSubmitting}
+                  />
                   <label htmlFor="privacy" className="text-xs text-gray-500">
                     Consent to the processing of specified personal data in
-                    accordance with the Personal Data Processing Policy
+                    accordance with the Personal Data Processing Policy*
                   </label>
                 </div>
                 <button
                   type="submit"
-                  className="w-full bg-[#DDAA31] text-white py-3 font-medium hover:bg-red-700 transition-colors"
+                  className="w-full bg-[#DDAA31] text-white py-3 font-medium hover:bg-[#C68C2C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isSubmitting}
                 >
-                  SUBMIT
+                  {isSubmitting ? "SUBMITTING..." : "SUBMIT REGISTRATION"}
                 </button>
               </form>
             </div>
